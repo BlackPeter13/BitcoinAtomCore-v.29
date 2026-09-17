@@ -1,2 +1,9 @@
-# Auto detect text files and perform LF normalization
-* text=auto
+src/clientversion.cpp export-subst
+# Atom: builds run in Linux containers — enforce LF so Windows checkouts
+# never inject CRLF into sources, scripts, or build files.
+* text=auto eol=lf
+*.png binary
+*.jpg binary
+*.ico binary
+*.icns binary
+*.pdf binary

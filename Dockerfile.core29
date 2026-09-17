@@ -1,0 +1,26 @@
+FROM debian:bookworm
+ENV DEBIAN_FRONTEND=noninteractive
+
+RUN apt-get update && apt-get install -y \
+    build-essential cmake pkgconf python3 ccache curl wget git \
+    libevent-dev libboost-dev libsqlite3-dev \
+    qtbase5-dev qttools5-dev qttools5-dev-tools \
+    libqrencode-dev libminiupnpc-dev libnatpmp-dev libzmq3-dev \
+ && rm -rf /var/lib/apt/lists/*
+
+# Berkeley DB 4.8 for the legacy wallet (binary-compatible with old wallets).
+RUN mkdir -p /opt/db4/src && cd /opt/db4/src \
+ && wget --no-check-certificate https://download.oracle.com/berkeley-db/db-4.8.30.NC.tar.gz \
+ && echo "12edc0df75bf9abd7f82f821795bcee50f42cb2e5f76a6a281b85732798364ef  db-4.8.30.NC.tar.gz" | sha256sum -c \
+ && tar xzf db-4.8.30.NC.tar.gz \
+ && cd db-4.8.30.NC \
+ && wget -O clang.patch https://gist.githubusercontent.com/LnL7/5153b251fd525fe15de69b67e63a6075/raw/7778e9364679093a32dec2908656738e16b6bdcb/clang.patch \
+ && patch -p2 < clang.patch \
+ && cd build_unix \
+ && ../dist/configure --enable-cxx --disable-shared --disable-replication --with-pic --prefix=/opt/db4 \
+ && make install \
+ && cd / && rm -rf /opt/db4/src
+
+ENV BDB_PREFIX=/opt/db4
+WORKDIR /src
+CMD ["/bin/bash"]
