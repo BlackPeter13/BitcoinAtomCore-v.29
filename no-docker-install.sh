@@ -43,6 +43,8 @@ fi
 # ---------------------------------------------------------------- repos ---
 log "fixing permissions on offline packages"
 chmod -R a+rX "$PKG_DIR" 2>/dev/null || true
+log "installing dpkg-dev for Packages index generation"
+apt-get install -y dpkg-dev > /dev/null 2>&1
 log "regenerating Packages index with correct paths"
 (cd "$PKG_DIR" && dpkg-scanpackages --multiversion . /dev/null 2>/dev/null | sed "s|Filename: \./|Filename: $PKG_DIR/|g" > Packages && gzip -f Packages)
 log "wiring local package repository"
